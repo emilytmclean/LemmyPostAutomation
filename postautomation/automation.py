@@ -8,7 +8,7 @@ import requests
 from PIL import Image
 from croniter import croniter
 from pythonlemmy import LemmyHttp
-from pythonlemmy.responses import GetCommunityResponse, PostResponse
+from pythonlemmy.responses import GetCommunityResponse
 
 from postautomation import PostCandidate, PostData
 from postautomation.candidate import CandidateProvider, CSVCandidateProvider
@@ -133,7 +133,7 @@ class PostAutomation:
             print("No candidates found")
             return
 
-        print(f"Candidate found")
+        print("Candidate found")
         print(f"Candidate url: {chosen_candidate.url}")
         print(f"Candidate title: {chosen_candidate.title}")
         print(f"Candidate content warnings: {chosen_candidate.content_warnings}")
@@ -164,5 +164,5 @@ class PostAutomation:
             if response.status_code != 200:
                 print(f"Failed to create post: {response.text}")
                 return
-            print(f"Post created")
+            print("Post created")
         self.candidate_provider.remove_candidate(chosen_candidate)

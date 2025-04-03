@@ -148,7 +148,7 @@ class PostAutomation:
         content_warning = ""
         if chosen.content_warnings is not None and len(chosen.content_warnings) > 0:
             content_warning = "[" + ", ".join(chosen.content_warnings) + "] "
-        title = f"{chosen.title} {content_warning}({', '.join(chosen.artists)})"
+        title = f"{chosen.title} {content_warning}({', '.join(chosen.artists)})".replace('\n', '')
         body = f"[Source]({chosen.url})"
 
         print(f"Creating post with title \"{title}\" and body \"{body}\"")

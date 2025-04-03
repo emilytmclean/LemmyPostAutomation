@@ -9,12 +9,14 @@ class E621Handler(Handler):
         return domain == "e621.net"
 
     def scrape(self, url: str, document: BeautifulSoup) -> PostData:
-        artists = [
-            x.contents[0].replace(" (artist)", "") for x in document.find_all(
-                "a",
-                {"itemprop": "author"},
-            ) if x.contents[0] != "conditional dnp"
-        ]
+        artists = list(
+            filter(lambda x: x != "conditional dnp", [
+                x.find_next("span").getText().strip().replace(" (artist)", "") for x in document.find_all(
+                    "a",
+                    {"itemprop": "author"},
+                )
+            ])
+        )
         print(artists)
         img_url = document.find(
             "section", {"id": "image-container"},

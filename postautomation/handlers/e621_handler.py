@@ -11,7 +11,7 @@ class E621Handler(Handler):
     def scrape(self, url: str, document: BeautifulSoup) -> PostData:
         artists = list(
             filter(lambda x: x != "conditional dnp", [
-                x.find_next("span").getText().strip().replace(" (artist)", "") for x in document.find_all(
+                x.find("span").find(text=True).strip().replace(" (artist)", "") for x in document.find_all(
                     "a",
                     {"itemprop": "author"},
                 )
@@ -22,10 +22,12 @@ class E621Handler(Handler):
             "section", {"id": "image-container"},
         )["data-file-url"]
 
+        nsfw = document.find("span", {"id": "post-rating-text"}).getText().strip() != "Safe"
+
         return PostData(
             url,
             None,
             artists,
             img_url,
-            True
+            nsfw
         )

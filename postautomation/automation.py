@@ -8,7 +8,7 @@ import requests
 from PIL import Image
 from croniter import croniter
 from pythonlemmy import LemmyHttp
-from pythonlemmy.responses import GetCommunityResponse
+from pythonlemmy.responses import GetCommunityResponse, PostResponse
 
 from postautomation import PostCandidate, PostData
 from postautomation.candidate import CandidateProvider, CSVCandidateProvider
@@ -103,7 +103,7 @@ class PostAutomation:
         print("Updating database")
         self.monitor.update_database()
 
-        print("Making a post")
+        print("Finding a candidate for a post")
         candidates: List[PostCandidate] = self.candidate_provider.list_candidates(None)[0]
         chosen: Optional[PostData] = None
         chosen_candidate: Optional[PostCandidate] = None
@@ -133,6 +133,10 @@ class PostAutomation:
             print("No candidates found")
             return
 
+        print(f"Candidate found")
+        print(f"Candidate url: {chosen_candidate.url}")
+        print(f"Candidate title: {chosen_candidate.title}")
+        print(f"Candidate content warnings: {chosen_candidate.content_warnings}")
         print("Uploading image")
         if not self.mock:
             try:
@@ -144,13 +148,21 @@ class PostAutomation:
         content_warning = ""
         if chosen.content_warnings is not None and len(chosen.content_warnings) > 0:
             content_warning = "[" + ", ".join(chosen.content_warnings) + "] "
+        title = f"{chosen.title} {content_warning}({', '.join(chosen.artists)})"
+        body = f"[Source]({chosen.url})"
+
+        print(f"Creating post with title \"{title}\" and body \"{body}\"")
 
         if not self.mock:
-            self.lemmy.create_post(
-                f"{chosen.title} {content_warning}({', '.join(chosen.artists)})",
+            response = self.lemmy.create_post(
+                title,
                 self.community_id,
-                body=f"[Source]({chosen.url})",
+                body=body,
                 nsfw=chosen.nsfw,
                 url=image_url
             )
+            if response.status_code != 200:
+                print(f"Failed to create post: {response.text}")
+                return
+            print(f"Post created")
         self.candidate_provider.remove_candidate(chosen_candidate)

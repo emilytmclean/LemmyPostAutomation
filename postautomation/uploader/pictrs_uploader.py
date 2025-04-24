@@ -23,16 +23,10 @@ class PictrsUploader(Uploader):
         self.jwt = jwt
 
     def upload(self, url: str, image: Image) -> str:
-        b = io.BytesIO()
-        try:
-            image.save(b, "jpeg")
-            mime = "image/jpeg"
-        except OSError:
-            image.save(b, "png")
-            mime = "image/png"
+        mime, b = self._get_bytes(image)
 
         result = requests.post(f"{self.instance_url}/pictrs/image", files={
-            "images[]": (f"image.{mime.split('/')[1]}", b.getvalue(), mime)
+            "images[]": (f"image.{mime.split('/')[1]}", b, mime)
         }, cookies={"jwt": self.jwt})
 
         content_s = result.content.decode("utf-8")

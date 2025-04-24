@@ -1,5 +1,3 @@
-import io
-
 import requests
 from PIL.Image import Image
 

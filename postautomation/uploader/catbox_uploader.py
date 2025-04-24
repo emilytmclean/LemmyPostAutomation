@@ -1,5 +1,3 @@
-import io
-
 import requests
 from PIL.Image import Image
 
@@ -10,18 +8,12 @@ class CatboxUploader(Uploader):
     api_base = "https://catbox.moe/user/api.php"
 
     def upload(self, url: str, image: Image) -> str:
-        b = io.BytesIO()
-        try:
-            image.save(b, "jpeg")
-            mime = "image/jpeg"
-        except OSError:
-            image.save(b, "png")
-            mime = "image/png"
+        mime, b = self._get_bytes(image)
 
         result = requests.post(self.api_base, data={
             "reqtype": "fileupload",
         }, files={
-            "fileToUpload": (f"image.{mime.split('/')[1]}", b.getvalue(), mime)
+            "fileToUpload": (f"image.{mime.split('/')[1]}", b, mime)
         })
 
         content = result.content.decode("utf-8")

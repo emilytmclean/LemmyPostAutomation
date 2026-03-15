@@ -82,8 +82,9 @@ class PostAutomation:
             print("No cron found, exiting...")
             return
 
-        print("Updating database")
-        self.monitor.update_database()
+        if not self.skip_check:
+            print("Updating database")
+            self.monitor.update_database()
 
         while True:
             next_run: datetime = self.cron.get_next(datetime, datetime.now())

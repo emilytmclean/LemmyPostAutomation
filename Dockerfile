@@ -2,8 +2,8 @@ FROM python:3.11-slim as base
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apt update \
-    && apt install -yqq wget git gnupg curl python3-pip
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -yqq wget git gnupg curl python3-pip
 RUN pip3 install pipenv
 
 # Copy source files

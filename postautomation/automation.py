@@ -31,6 +31,7 @@ class PostAutomation:
     uploader: Uploader
     reconnection_manager = ReconnectionDelayManager()
     mock: bool
+    skip_check: bool
 
     def __init__(
             self,
@@ -41,7 +42,8 @@ class PostAutomation:
             candidate_provider: CandidateProvider,
             uploader: Uploader,
             cron: Optional[str],
-            mock: bool = False
+            mock: bool = False,
+            skip_check: bool = False,
     ):
         self.lemmy = lemmy
         self.community_id = GetCommunityResponse(lemmy.get_community(name=community_name)).community_view.community.id
@@ -50,6 +52,7 @@ class PostAutomation:
         self.candidate_provider = candidate_provider
         self.uploader = uploader
         self.mock = mock
+        self.skip_check = skip_check
         if cron is not None:
             self.cron = croniter(cron, datetime.now())
 
@@ -60,7 +63,8 @@ class PostAutomation:
         csv_file_location: str,
         cron: Optional[str] = None,
         handlers: Optional[List[Handler]] = None,
-        uploader: Uploader = CatboxUploader()
+        uploader: Uploader = CatboxUploader(),
+        skip_check: bool = False,
     ):
         return PostAutomation(
             lemmy,
@@ -69,7 +73,8 @@ class PostAutomation:
             Scraper([E621Handler(), FuraffinityHandler()] if handlers is None else handlers),
             CSVCandidateProvider(csv_file_location),
             uploader,
-            cron
+            cron,
+            skip_check=skip_check,
         )
 
     def run(self):
@@ -100,8 +105,9 @@ class PostAutomation:
                 self.reconnection_manager.wait()
 
     def _run_once(self):
-        print("Updating database")
-        self.monitor.update_database()
+        if not self.skip_check:
+            print("Updating database")
+            self.monitor.update_database()
 
         print("Finding a candidate for a post")
         candidates: List[PostCandidate] = self.candidate_provider.list_candidates(None)[0]
@@ -112,7 +118,7 @@ class PostAutomation:
             scraped = self.scraper.scrape(candidate.url)
             image = Image.open(BytesIO(requests.get(scraped.image_url).content))
             
-            if not self.monitor.has_been_posted(image):
+            if self.skip_check or not self.monitor.has_been_posted(image):
                 if candidate.title is not None:
                     scraped.title = candidate.title
                 elif scraped.title is None:

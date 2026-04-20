@@ -15,7 +15,7 @@ python-dateutil==2.9.0.post0 ; python_version >= '2.7' and python_version not in
 pythonlemmy==0.3.0
 pytz==2024.2
 pywavelets==1.7.0 ; python_version >= '3.10'
-requests==2.32.3
+requests==2.32.4
 scipy==1.14.1 ; python_version >= '3.10'
 six==1.16.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 soupsieve==2.6 ; python_version >= '3.8'
